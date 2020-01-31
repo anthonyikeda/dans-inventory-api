@@ -1,0 +1,30 @@
+= Inventory API
+Anthony Ikea <anthony.ikeda@gmail.com>
+0.0.1
+:toc: right
+:icons: font
+:listing-caption: Listing
+
+== Introduction
+
+This is the API that manages all products for Dan's cafe. Products are broken down into 2 main
+categories:
+
+* Drinks
+* Snacks
+
+This API allows Dan to determine what products are available, how much they cost and how many of the items
+he has left available to sell.
+
+Prices for the products can change based on demand, events and the season.
+
+== Data Model
+
+* products
+* category_labels
+* prices
+* specials
+
+== API
+
+The API can be viewed here: [API link to file]
