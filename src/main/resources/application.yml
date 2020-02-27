@@ -1,1 +1,8 @@
+spring:
+  flyway:
+    locations: classpath:db/migration,classpath:db/specific/{vendor}
+  datasource:
+    url: jdbc:postgresql://localhost:5432/dans_inventory
+    username: dans_admin
+    password: letmein
 
