@@ -13,6 +13,9 @@ public class ProductDTO {
     @JsonProperty
     private ProductType productType;
 
+    @JsonProperty(required = true)
+    private String sku;
+
     @JsonProperty
     private String[] labels;
 
@@ -38,6 +41,14 @@ public class ProductDTO {
 
     public void setProductType(ProductType productType) {
         this.productType = productType;
+    }
+
+    public String getSku() {
+        return sku;
+    }
+
+    public void setSku(String sku) {
+        this.sku = sku;
     }
 
     public String[] getLabels() {

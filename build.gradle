@@ -3,6 +3,7 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.9.RELEASE'
     id 'java'
     id "org.flywaydb.flyway" version "6.2.4"
+    id 'jacoco'
 }
 
 group = 'com.cloudy-eng.service'
@@ -25,8 +26,21 @@ dependencies {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
     testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'org.flywaydb.flyway-test-extensions:flyway-spring-test:6.1.0'
 }
 
 test {
     useJUnitPlatform()
+}
+
+jacoco {
+    toolVersion = "0.8.5"
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled false
+        csv.enabled false
+        html.destination file("${buildDir}/jacocoHtml")
+    }
 }

@@ -3,6 +3,7 @@ create table product (
     display_name varchar(180),
     description clob,
     type varchar(20),
+    sku varchar(40) not null unique ,
     created timestamp,
     created_by varchar(50),
     last_updated timestamp

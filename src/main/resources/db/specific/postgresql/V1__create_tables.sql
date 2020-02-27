@@ -3,12 +3,14 @@ create table product (
     display_name varchar(180),
     description text,
     type varchar(20),
+    sku varchar(40) not null,
     created timestamp,
     created_by varchar(50),
     last_updated timestamp
 );
 
 alter table product add constraint pk_product_id primary key(product_id);
+create unique index idx_sku on product(sku);
 
 create table inventory (
     product_id bigint not null,
