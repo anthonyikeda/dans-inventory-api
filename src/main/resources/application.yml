@@ -2,7 +2,28 @@ spring:
   flyway:
     locations: classpath:db/migration,classpath:db/specific/{vendor}
   datasource:
-    url: jdbc:postgresql://localhost:5432/dans_inventory
+    url: jdbc:postgresql://localhost:15432/dans_inventory
     username: dans_admin
     password: letmein
+  jpa:
+    show-sql: true
 
+keycloak:
+  auth-server-url: http://localhost:8080/auth
+  realm: chatbot
+  resource: backend-service
+  client-key-password: 1418c492-30b9-484b-8026-c23fe03538d7
+  public-client: false
+  cors: true
+  cors-allowed-headers: "location,authorization"
+  cors-allowed-methods: "GET,POST"
+  cors-exposed-headers: "location,authorization"
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.keycloak: DEBUG
+    com.cloudyeng.service.inventoryapi: DEBUG
+    org.springframework.data: DEBUG
+server:
+  port: 8050

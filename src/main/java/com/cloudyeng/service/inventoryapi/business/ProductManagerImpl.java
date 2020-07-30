@@ -7,14 +7,19 @@ import com.cloudyeng.service.inventoryapi.repository.ProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class ProductManagerImpl implements ProductManager {
 
-    private Logger log = LoggerFactory.getLogger(ProductManagerImpl.class);
+    private final Logger log = LoggerFactory.getLogger(ProductManagerImpl.class);
 
-    private ProductRepository productRepository;
+    private final ProductRepository productRepository;
 
     @Autowired
     public ProductManagerImpl(ProductRepository aRepository) {
@@ -43,9 +48,19 @@ public class ProductManagerImpl implements ProductManager {
                 .map(this::toDto).get();
     }
 
+    @Override
+    public List<ProductDTO> getProducts(int limit, int page) {
+        log.debug("Loading products with page {} and size {}", page, limit);
+        Pageable resultPage = PageRequest.of(page, limit);
+        return this.productRepository.findAll(resultPage)
+                .map(this::toDto)
+                .stream()
+                .collect(Collectors.toList());
+    }
+
     private ProductDTO toDto(ProductDAO dao) {
         ProductDTO dto = new ProductDTO();
-        dto.setProductType(ProductType.valueOf(dao.getProductType()));
+        dto.setProductType(ProductType.valueOf(dao.getProductType().toUpperCase()));
         dto.setName(dao.getDisplayName());
         dto.setDescription(dao.getDescription());
         dto.setSku(dao.getSku());

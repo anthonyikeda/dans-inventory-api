@@ -3,7 +3,7 @@ spring:
     username: sa
     url: jdbc:hsqldb:file:inventory-database;shutdown=true
   flyway:
-    locations: classpath:/db/migration,classpath:/db/specific/{vendor}
+    locations: classpath:/db/specific/hsqldb
 
 logging:
   level:

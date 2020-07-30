@@ -5,6 +5,7 @@ import com.cloudyeng.service.inventoryapi.dto.ProductType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.flywaydb.test.annotation.FlywayTest;
 import org.flywaydb.test.junit5.FlywayTestExtension;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,8 @@ public class ProductControllerTest {
 
     @Test
     @FlywayTest
-    public void shouldReturnNotImplemented() throws Exception {
+    @Disabled
+    public void shouldReturnCreated() throws Exception {
         ProductDTO dto = new ProductDTO();
         dto.setName("Cafe latte");
         dto.setDescription("A creamy, frothy drink");
