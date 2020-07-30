@@ -30,3 +30,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+inventory-database.lobs
+inventory-database.properties
+inventory-database.script
