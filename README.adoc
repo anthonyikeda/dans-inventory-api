@@ -5,7 +5,8 @@ Anthony Ikeda <anthony.ikeda@gmail.com>
 :icons: font
 :listing-caption: Listing
 
-image::https://travis-ci.com/anthonyikeda/dans-inventory-api.svg?token=ZjeypZTqSyxpHRYbp5i2&branch=master[Build]
+image::https://github.com/anthonyikeda/dans-inventory-api/actions/workflows/maven.yml/badge.svg[Java CI with Maven]
+
 == Introduction
 
 This is the API that manages all products for Dan's cafe. Products are broken down into 2 main
