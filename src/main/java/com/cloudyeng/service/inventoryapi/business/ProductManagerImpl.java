@@ -1,6 +1,7 @@
 package com.cloudyeng.service.inventoryapi.business;
 
 import com.cloudyeng.service.inventoryapi.dao.ProductDAO;
+import com.cloudyeng.service.inventoryapi.dto.PricedProductDTO;
 import com.cloudyeng.service.inventoryapi.dto.ProductDTO;
 import com.cloudyeng.service.inventoryapi.dto.ProductType;
 import com.cloudyeng.service.inventoryapi.repository.PricedProductRepository;
@@ -54,6 +55,16 @@ public class ProductManagerImpl {
                 .stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
+    }
+
+    public PricedProductDTO getProductWithPrice(Long productId) throws ProductNotFoundException {
+        PricedProductDTO found = this.pricedProductRepository.findProductWithLatestPrice(productId);
+
+        if(found == null) {
+            throw new ProductNotFoundException(String.format("Product with id %d not found", productId));
+        } else {
+            return found;
+        }
     }
 
     private ProductDTO toDto(ProductDAO dao) {

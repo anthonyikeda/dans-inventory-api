@@ -1,6 +1,6 @@
 package com.cloudyeng.service.inventoryapi.business;
 
-import com.cloudyeng.service.inventoryapi.dao.ProductDAO;
+import com.cloudyeng.service.inventoryapi.dto.PricedProductDTO;
 import com.cloudyeng.service.inventoryapi.dto.ProductDTO;
 import com.cloudyeng.service.inventoryapi.dto.ProductType;
 import io.quarkus.test.junit.QuarkusTest;
@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.inject.Inject;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -61,4 +63,20 @@ public class ProductManagerImplTest {
         assertThat(dto.getSku()).isEqualTo("53234234");
     }
 
+    @Test
+    public void testGetPagedProducts() {
+        List<ProductDTO> products = this.manager.getProducts(10, 0);
+
+        assertThat(products).isNotNull().isNotEmpty().hasSize(10);
+    }
+
+    @Test
+    public void testFindPricedProducts() {
+        try {
+            PricedProductDTO pricedProduct = this.manager.getProductWithPrice(2L);
+            assertThat(pricedProduct).isNotNull().hasFieldOrPropertyWithValue("price", "3.50");
+        } catch(ProductNotFoundException pnfe) {
+            log.error(pnfe.getMessage(), pnfe);
+        }
+    }
 }
