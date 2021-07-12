@@ -3,37 +3,25 @@ package com.cloudyeng.service.inventoryapi.controller;
 import com.cloudyeng.service.inventoryapi.dto.ProductDTO;
 import com.cloudyeng.service.inventoryapi.dto.ProductType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.flywaydb.test.annotation.FlywayTest;
-import org.flywaydb.test.junit5.FlywayTestExtension;
+import io.quarkus.test.junit.QuarkusTest;
+import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.util.Base64Utils;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import javax.inject.Inject;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ExtendWith({FlywayTestExtension.class})
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+import java.util.Base64;
+
+import static io.restassured.RestAssured.given;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.is;
+
+@QuarkusTest
 public class ProductControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper mapper;
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @Test
-    @FlywayTest
     @Disabled
     public void shouldReturnCreated() throws Exception {
         ProductDTO dto = new ProductDTO();
@@ -46,12 +34,15 @@ public class ProductControllerTest {
 
         String body = mapper.writeValueAsString(dto);
 
-        this.mockMvc.perform(
-                post("/v1/product")
-                        .content(body)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", String.format("Basic %s", Base64Utils.encodeToString("user:letmein".getBytes())))
-        ).andDo(print())
-                .andExpect(status().isCreated());
+        String authHeader = new String(Base64.getEncoder().encode("user:letmein".getBytes()));
+
+        given().log().all()
+                .body(body)
+                .header("Authorization", String.format("Basic %s", authHeader))
+                .contentType(ContentType.fromContentType("application/json"))
+                .when()
+                .post("/v1/product")
+                .then()
+                .statusCode(201);
     }
 }

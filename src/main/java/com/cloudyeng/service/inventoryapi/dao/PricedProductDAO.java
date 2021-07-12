@@ -1,24 +1,39 @@
-package com.cloudyeng.service.inventoryapi.dto;
+package com.cloudyeng.service.inventoryapi.dao;
 
-import java.sql.Date;
+import org.hibernate.annotations.Immutable;
 
-public class PricedProductDTO {
+import javax.persistence.*;
+import java.sql.Timestamp;
 
+@Entity(name = "PricedProduct")
+@Table(name = "product_latest_prices")
+@Immutable
+public class PricedProductDAO {
+
+    @Id
+    @Column(name = "product_id")
     private Long productId;
 
+    @Column(name = "display_name")
     private String displayName;
 
+    @Column(name = "description")
     private String description;
 
-    private String type;
+    @Column(name = "type")
+    private String productType;
 
+    @Column(name = "sku")
     private String sku;
 
+    @Column(name = "price_id")
     private Long priceId;
 
-    private String price;
+    @Column(name = "price")
+    private Float price;
 
-    private Date effectiveDate;
+    @Column(name = "effective_date")
+    private Timestamp effectiveDate;
 
     public Long getProductId() {
         return productId;
@@ -44,12 +59,12 @@ public class PricedProductDTO {
         this.description = description;
     }
 
-    public String getType() {
-        return type;
+    public String getProductType() {
+        return productType;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setProductType(String productType) {
+        this.productType = productType;
     }
 
     public String getSku() {
@@ -68,19 +83,19 @@ public class PricedProductDTO {
         this.priceId = priceId;
     }
 
-    public String getPrice() {
+    public Float getPrice() {
         return price;
     }
 
-    public void setPrice(String price) {
+    public void setPrice(Float price) {
         this.price = price;
     }
 
-    public Date getEffectiveDate() {
+    public Timestamp getEffectiveDate() {
         return effectiveDate;
     }
 
-    public void setEffectiveDate(Date effectiveDate) {
+    public void setEffectiveDate(Timestamp effectiveDate) {
         this.effectiveDate = effectiveDate;
     }
 }

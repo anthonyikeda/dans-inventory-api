@@ -1,61 +1,70 @@
 package com.cloudyeng.service.inventoryapi.business;
 
 import com.cloudyeng.service.inventoryapi.dao.ProductDAO;
+import com.cloudyeng.service.inventoryapi.dto.PricedProductDTO;
 import com.cloudyeng.service.inventoryapi.dto.ProductDTO;
 import com.cloudyeng.service.inventoryapi.dto.ProductType;
+import com.cloudyeng.service.inventoryapi.repository.PricedProductRepository;
 import com.cloudyeng.service.inventoryapi.repository.ProductRepository;
+import io.quarkus.panache.common.Sort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Component;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Component
-public class ProductManagerImpl implements ProductManager {
+@ApplicationScoped
+public class ProductManagerImpl {
 
     private final Logger log = LoggerFactory.getLogger(ProductManagerImpl.class);
 
-    private final ProductRepository productRepository;
+    @Inject
+    ProductRepository productRepository;
 
-    @Autowired
-    public ProductManagerImpl(ProductRepository aRepository) {
-        this.productRepository = aRepository;
-    }
+    @Inject
+    PricedProductRepository pricedProductRepository;
 
-    @Override
-    public Long createProduct(ProductDTO productDTO) {
+    @Transactional
+    public Long createProduct(ProductDTO productDTO) throws ProductExistsException {
         Long foundId = productRepository.findBySku(productDTO.getSku());
 
         if(foundId != null) {
             //throw Exception
             log.error("Product with sku {} found. Cannot create new entry.", productDTO.getSku());
-            throw new RuntimeException("SKU Already Exists");
+            throw new ProductExistsException(String.format("SKU Already Exists: %s", productDTO.getSku()));
         } else {
             log.debug("Product SKU does not exist! Creating new product.");
             ProductDAO dao = toDao(productDTO);
-            ProductDAO saved = this.productRepository.save(dao);
-            return saved.getProductId();
+            this.productRepository.persist(dao);
+            return dao.getProductId();
         }
     }
 
-    @Override
     public ProductDTO getProduct(Long productId) {
-        return this.productRepository.findById(productId)
-                .map(this::toDto).get();
+        ProductDAO dao = this.productRepository.findById(productId);
+        return toDto(dao);
     }
 
-    @Override
     public List<ProductDTO> getProducts(int limit, int page) {
         log.debug("Loading products with page {} and size {}", page, limit);
-        Pageable resultPage = PageRequest.of(page, limit);
-        return this.productRepository.findAll(resultPage)
-                .map(this::toDto)
+
+        return this.productRepository.findAll(Sort.ascending("product_id")).page(page, limit).list()
                 .stream()
+                .map(this::toDto)
                 .collect(Collectors.toList());
+    }
+
+    public PricedProductDTO getProductWithPrice(Long productId) throws ProductNotFoundException {
+        PricedProductDTO found = this.pricedProductRepository.findProductWithLatestPrice(productId);
+
+        if(found == null) {
+            throw new ProductNotFoundException(String.format("Product with id %d not found", productId));
+        } else {
+            return found;
+        }
     }
 
     private ProductDTO toDto(ProductDAO dao) {

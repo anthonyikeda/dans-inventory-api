@@ -1,30 +1,47 @@
 package com.cloudyeng.service.inventoryapi.business;
 
-import com.cloudyeng.service.inventoryapi.dao.ProductDAO;
+import com.cloudyeng.service.inventoryapi.dto.PricedProductDTO;
 import com.cloudyeng.service.inventoryapi.dto.ProductDTO;
 import com.cloudyeng.service.inventoryapi.dto.ProductType;
-import com.cloudyeng.service.inventoryapi.repository.ProductRepository;
-import org.assertj.core.api.Assertions;
+import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.Optional;
+import javax.inject.Inject;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
+@QuarkusTest
+@Testcontainers
 public class ProductManagerImplTest {
 
-    private ProductManager manager;
+    private final Logger log = LoggerFactory.getLogger(ProductManagerImplTest.class);
 
-    private ProductRepository repository;
+    @Inject
+    ProductManagerImpl manager;
 
     @Test
     public void testCreateExistingProduct() {
-        repository = Mockito.mock(ProductRepository.class);
-        manager = new ProductManagerImpl(repository);
-        Mockito.when(repository.findBySku(Mockito.anyString())).thenReturn(100L);
+        ProductDTO dto = new ProductDTO();
+        dto.setSku("42123");
+        dto.setDescription("Creamy, foamy coffee");
+        dto.setName("Cafe Latte");
+        dto.setProductType(ProductType.BEVERAGE);
+
+        try {
+            Long productId = manager.createProduct(dto);
+            assertThat(productId).isNull();
+        } catch(ProductExistsException e) {
+            assertThat(e).isNotNull();
+        }
+    }
+
+    @Test
+    public void testCreateProduct() {
         ProductDTO dto = new ProductDTO();
         dto.setSku("123123");
         dto.setDescription("An interesting snack");
@@ -32,50 +49,34 @@ public class ProductManagerImplTest {
         dto.setProductType(ProductType.SNACK);
 
         try {
-            manager.createProduct(dto);
-        } catch(RuntimeException re) {
-            assertThat(re).isNotNull();
+            Long productId = manager.createProduct(dto);
+            assertThat(productId).isNotNull().isGreaterThan(1L);
+        } catch(ProductExistsException e) {
+            log.error(e.getMessage(), e);
         }
-
-    }
-
-    @Test
-    public void testCreateProduct() {
-        ProductDAO dao = new ProductDAO();
-        dao.setProductId(1L);
-
-        repository = Mockito.mock(ProductRepository.class);
-        manager = new ProductManagerImpl(repository);
-        Mockito.when(repository.findBySku(Mockito.anyString())).thenReturn(null);
-        Mockito.when(repository.save(Mockito.any(ProductDAO.class))).thenReturn(dao);
-
-        ProductDTO dto = new ProductDTO();
-        dto.setSku("123123");
-        dto.setDescription("An interesting snack");
-        dto.setName("Snacky snack");
-        dto.setProductType(ProductType.SNACK);
-
-        Long productId = manager.createProduct(dto);
-        assertThat(productId).isNotNull().isEqualTo(1L);
     }
 
     @Test
     public void testGetProductSuccess() {
-        repository = Mockito.mock(ProductRepository.class);
-        manager = new ProductManagerImpl(repository);
-
-        ProductDAO dao = new ProductDAO();
-        dao.setProductId(1234L);
-        dao.setDisplayName("Drinky drink");
-        dao.setProductType(ProductType.BEVERAGE.name());
-        dao.setSku("7549202");
-
-        Optional<ProductDAO> value = Optional.of(dao);
-        Mockito.when(repository.findById(Mockito.anyLong())).thenReturn(value);
-
-        ProductDTO dto = manager.getProduct(1234L);
+        ProductDTO dto = manager.getProduct(2L);
         assertThat(dto).isNotNull();
-        assertThat(dto.getSku()).isEqualTo(dao.getSku());
+        assertThat(dto.getSku()).isEqualTo("53234234");
     }
 
+    @Test
+    public void testGetPagedProducts() {
+        List<ProductDTO> products = this.manager.getProducts(10, 0);
+
+        assertThat(products).isNotNull().isNotEmpty().hasSize(10);
+    }
+
+    @Test
+    public void testFindPricedProducts() {
+        try {
+            PricedProductDTO pricedProduct = this.manager.getProductWithPrice(2L);
+            assertThat(pricedProduct).isNotNull().hasFieldOrPropertyWithValue("price", "3.50");
+        } catch(ProductNotFoundException pnfe) {
+            log.error(pnfe.getMessage(), pnfe);
+        }
+    }
 }
